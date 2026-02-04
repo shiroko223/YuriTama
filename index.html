@@ -1,993 +1,251 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YuriTama</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<title>Yuri Garden Reader</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-            background-color: #ffffff;
-            overflow-x: hidden;
-        }
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Segoe UI,Arial;background:#fff}
 
-        /* Header cố định */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background-color: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 15px;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
+/* ===== HEADER ===== */
+.header{
+    position:fixed;top:0;left:0;right:0;height:60px;
+    background:#fff;display:flex;align-items:center;
+    justify-content:space-between;padding:0 15px;
+    box-shadow:0 2px 10px rgba(0,0,0,.05);
+    z-index:100;
+}
+.icon-btn{font-size:22px;background:none;border:none;cursor:pointer;color:#7b3fe4}
+.mode-indicator{font-size:12px;padding:5px 10px;border-radius:20px}
+.mode-read{background:#e3f2fd;color:#1976d2}
+.mode-edit{background:#fff3e0;color:#f57c00}
 
-        .header-left, .header-right {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
+/* ===== BANNER ===== */
+.banner-container{margin-top:60px;position:relative}
+.banner{width:100%;height:260px;object-fit:cover}
+.change-banner-btn{
+    position:absolute;bottom:15px;right:15px;
+    padding:8px 14px;border-radius:20px;
+    border:none;background:rgba(0,0,0,.6);
+    color:#fff;display:none
+}
+.banner-container:hover .change-banner-btn{display:block}
 
-        .icon-btn {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #6b4ce6;
-            padding: 5px;
-        }
+/* ===== CONTENT ===== */
+.content-wrapper{padding:25px 15px 120px}
+.hidden{display:none}
 
-        .mode-indicator {
-            font-size: 12px;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-weight: 500;
-        }
+/* ===== HOME PAGE ===== */
+.story-header{display:flex;gap:25px}
+.story-cover{width:220px;border-radius:12px}
+.story-info h1{color:#7b3fe4;margin-bottom:8px}
+.tag-list{display:flex;gap:8px;margin-bottom:10px}
+.tag{background:#ffe3f1;color:#c2185b;padding:5px 12px;border-radius:20px;font-size:13px}
+.story-meta{display:flex;gap:15px;font-size:14px;color:#666;margin:8px 0}
+.story-actions{margin-top:12px;display:flex;gap:10px}
+.story-tabs{display:flex;gap:10px;margin:30px 0 15px}
+.tab{padding:10px 18px;border-radius:20px;border:none;background:#f3e5ff;cursor:pointer}
+.tab.active{background:#7b3fe4;color:#fff}
+.chapter-item{
+    padding:15px;border-radius:12px;
+    background:#fafafa;margin-bottom:10px;
+    cursor:pointer
+}
+.chapter-item:hover{background:#ece3ff}
 
-        .mode-read {
-            background-color: #e3f2fd;
-            color: #1976d2;
-        }
+/* ===== READER ===== */
+.chapter-title{font-size:22px;margin-bottom:20px}
+.text-content{line-height:1.8;margin-bottom:18px}
 
-        .mode-edit {
-            background-color: #fff3e0;
-            color: #f57c00;
-        }
+/* ===== FOOTER ===== */
+.footer-nav{
+    position:fixed;bottom:0;left:0;right:0;
+    background:#fff;box-shadow:0 -2px 10px rgba(0,0,0,.1)
+}
+.progress-bar{height:3px;background:#eee}
+.progress-fill{height:100%;background:#7b3fe4;width:0%}
+.chapter-selector{display:flex;align-items:center;padding:12px}
+.nav-btn{font-size:22px;border:none;background:none;color:#7b3fe4}
+.dropdown-btn{
+    flex:1;margin:0 10px;padding:10px;
+    border-radius:8px;border:1px solid #ddd;
+    background:#f5f5f5;cursor:pointer
+}
+.dropdown-menu{
+    position:absolute;bottom:60px;left:15px;right:15px;
+    background:#fff;border-radius:8px;
+    max-height:300px;overflow:auto;
+    display:none
+}
+.dropdown-menu.show{display:block}
+.dropdown-item{padding:12px;border-bottom:1px solid #eee;cursor:pointer}
+.dropdown-item:hover{background:#f5f5f5}
 
-        /* Banner truyện */
-        .banner-container {
-            margin-top: 60px;
-            position: relative;
-        }
-
-        .banner {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-            display: block;
-        }
-
-        .change-banner-btn {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background-color: rgba(0,0,0,0.6);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            display: none;
-        }
-
-        .banner-container:hover .change-banner-btn {
-            display: block;
-        }
-
-        /* Nội dung cuộn */
-        .content-wrapper {
-            padding: 20px 15px 100px 15px;
-            min-height: calc(100vh - 310px);
-        }
-
-        .chapter-title {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        /* Văn bản truyện */
-        .text-content {
-            line-height: 1.8;
-            font-size: 16px;
-            color: #333;
-            text-align: justify;
-            margin-bottom: 20px;
-        }
-
-        /* Footer navigation cố định */
-        .footer-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 100;
-        }
-
-        /* Thanh tiến trình */
-        .progress-bar {
-            width: 100%;
-            height: 3px;
-            background-color: #f0f0f0;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background-color: #6b4ce6;
-            width: 0%;
-            transition: width 0.3s;
-        }
-
-        /* Chapter selector */
-        .chapter-selector {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 15px 20px;
-        }
-
-        .nav-btn {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: #6b4ce6;
-            cursor: pointer;
-            padding: 5px 10px;
-        }
-
-        .nav-btn:disabled {
-            color: #ccc;
-            cursor: not-allowed;
-        }
-
-        .chapter-dropdown {
-            flex: 1;
-            margin: 0 15px;
-            position: relative;
-        }
-
-        .dropdown-btn {
-            width: 100%;
-            padding: 12px 15px;
-            background-color: #f5f5f5;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            bottom: 100%;
-            left: 0;
-            right: 0;
-            max-height: 300px;
-            overflow-y: auto;
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
-        }
-
-        .dropdown-menu.show {
-            display: block;
-        }
-
-        .dropdown-item {
-            padding: 12px 15px;
-            cursor: pointer;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .dropdown-item:hover {
-            background-color: #f5f5f5;
-        }
-
-        .dropdown-item.active {
-            background-color: #6b4ce6;
-            color: white;
-        }
-
-        .delete-chapter-btn {
-            background: #ff4444;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .dropdown-item.active .delete-chapter-btn {
-            background: #ff6666;
-        }
-
-
-
-        /* Modal chung */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 200;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background-color: white;
-            border-radius: 15px;
-            padding: 25px;
-            max-width: 500px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #555;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            font-family: inherit;
-        }
-
-        .form-textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            font-family: inherit;
-            min-height: 200px;
-            resize: vertical;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            font-weight: 500;
-        }
-
-        .btn-primary {
-            background-color: #6b4ce6;
-            color: white;
-        }
-
-        .btn-secondary {
-            background-color: #f0f0f0;
-            color: #333;
-        }
-
-        .btn-danger {
-            background-color: #ff4444;
-            color: white;
-        }
-
-
-
-        .empty-state {
-            text-align: center;
-            padding: 50px 20px;
-            color: #999;
-        }
-
-        .empty-state-icon {
-            font-size: 60px;
-            margin-bottom: 20px;
-        }
-
-        /* Password modal */
-        .password-input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            margin-bottom: 15px;
-        }
-
-        .password-hint {
-            font-size: 12px;
-            color: #999;
-            margin-top: 10px;
-            text-align: center;
-        }
-
-        .error-message {
-            color: #ff4444;
-            font-size: 14px;
-            margin-top: 10px;
-            text-align: center;
-        }
-    </style>
+/* ===== MODAL ===== */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:200}
+.modal.show{display:flex}
+.modal-content{background:#fff;padding:25px;border-radius:15px;width:100%;max-width:450px}
+.form-input,.form-textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;margin-top:8px}
+.form-textarea{min-height:160px}
+.btn{padding:10px;border:none;border-radius:8px;cursor:pointer}
+.btn-primary{background:#7b3fe4;color:#fff}
+.btn-secondary{background:#eee}
+.btn-danger{background:#ff4444;color:#fff}
+</style>
 </head>
+
 <body>
-    <!-- Header -->
-    <div class="header">
-        <div class="header-left">
-            <button class="icon-btn" onclick="window.location.reload()">🏠</button>
-            <span class="mode-indicator mode-read" id="modeIndicator">📖 Chế độ Đọc</span>
-        </div>
-        <div class="header-right">
-            <button class="icon-btn" id="editModeBtn" onclick="showPasswordModal()">✏️</button>
-            <button class="icon-btn" id="addChapterBtn" onclick="showAddModal()" style="display:none">➕</button>
-        </div>
-    </div>
 
-    <!-- Banner -->
-    <div class="banner-container">
-        <img src="https://i.redd.it/fd92bpdhjvad1.png" 
-             alt="Banner" class="banner" id="banner">
-        <button class="change-banner-btn" id="changeBannerBtn" onclick="showBannerModal()" style="display:none">
-            📷 Đổi ảnh
-        </button>
+<!-- HEADER -->
+<div class="header">
+    <button class="icon-btn" onclick="showHome()">🏠</button>
+    <span id="modeIndicator" class="mode-indicator mode-read">📖 Chế độ Đọc</span>
+    <div>
+        <button class="icon-btn" id="editBtn" onclick="showPassword()">✏️</button>
+        <button class="icon-btn hidden" id="addBtn" onclick="showAdd()">➕</button>
     </div>
+</div>
 
-    <!-- Nội dung -->
-    <div class="content-wrapper" id="contentWrapper">
-        <h2 class="chapter-title" id="chapterTitle">Chưa có chapter nào</h2>
-        <div id="chapterContent">
-            <div class="empty-state">
-                <div class="empty-state-icon">📖</div>
-                <p>Nhấn nút ✏️ ở góc trên để vào chế độ chỉnh sửa và thêm chapter đầu tiên!</p>
-            </div>
-        </div>
-    </div>
+<!-- BANNER -->
+<div class="banner-container">
+    <img id="banner" class="banner">
+    <button class="change-banner-btn" id="bannerBtn" onclick="showBanner()">📷 Đổi ảnh</button>
+</div>
 
-    <!-- Footer Navigation -->
-    <div class="footer-nav">
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressFill"></div>
-        </div>
-        <div class="chapter-selector">
-            <button class="nav-btn" id="prevBtn" onclick="prevChapter()">←</button>
-            
-            <div class="chapter-dropdown">
-                <button class="dropdown-btn" onclick="toggleDropdown()">
-                    <span id="currentChapter">Chọn chapter</span>
-                    <span>▼</span>
-                </button>
-                <div class="dropdown-menu" id="dropdownMenu"></div>
+<!-- HOME -->
+<div class="content-wrapper" id="homePage">
+    <div class="story-header">
+        <img id="storyCover" class="story-cover">
+        <div class="story-info">
+            <h1 id="storyTitle"></h1>
+            <div class="tag-list" id="tags"></div>
+            <div class="story-meta">
+                <span id="status"></span>
+                <span>📅 <span id="update"></span></span>
+                <span>👁️ <span id="views"></span></span>
+                <span>🔖 <span id="follows"></span></span>
             </div>
-            
-            <button class="nav-btn" id="nextBtn" onclick="nextChapter()">→</button>
-        </div>
-    </div>
-
-    <!-- Modal nhập mật khẩu -->
-    <div class="modal" id="passwordModal">
-        <div class="modal-content" style="max-width: 400px;">
-            <div class="modal-header">🔒 Chế độ Chỉnh Sửa</div>
-            
-            <div class="form-group">
-                <label class="form-label">Nhập mật khẩu để vào chế độ Edit:</label>
-                <input type="password" class="password-input" id="passwordInput" 
-                       placeholder="Nhập mật khẩu..." onkeypress="handlePasswordEnter(event)">
-                <div class="password-hint">💡 Mật khẩu mặc định: <strong>admin</strong></div>
-                <div class="error-message" id="passwordError"></div>
-            </div>
-            
-            <div class="modal-buttons">
-                <button class="btn btn-secondary" onclick="closePasswordModal()">Hủy</button>
-                <button class="btn btn-primary" onclick="checkPassword()">Xác nhận</button>
-            </div>
-            
-            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
-                <div class="form-group">
-                    <label class="form-label">Đổi mật khẩu mới:</label>
-                    <input type="password" class="password-input" id="newPasswordInput" 
-                           placeholder="Nhập mật khẩu mới...">
-                    <button class="btn btn-primary" style="width: 100%;" onclick="changePassword()">
-                        💾 Lưu mật khẩu mới
-                    </button>
-                </div>
+            <div><b>Tác giả:</b> <span id="author"></span></div>
+            <div><b>Nhóm:</b> <span id="group"></span></div>
+            <div class="story-actions">
+                <button class="btn btn-primary" onclick="continueRead()">📖 Tiếp tục đọc</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal thêm chapter -->
-    <div class="modal" id="addModal">
-        <div class="modal-content">
-            <div class="modal-header">✍️ Thêm Chapter Mới</div>
-            
-            <div class="form-group">
-                <label class="form-label">Tên Chapter</label>
-                <input type="text" class="form-input" id="chapterTitleInput" 
-                       placeholder="Ví dụ: Chapter 1: Khởi đầu">
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Nội dung Chapter</label>
-                <textarea class="form-textarea" id="chapterContentInput" 
-                          placeholder="Paste nội dung truyện vào đây...
-
-Mỗi đoạn văn sẽ tự động được ngăn cách.
-Chỉ cần paste và nhấn Lưu!"></textarea>
-            </div>
-            
-            <div class="modal-buttons">
-                <button class="btn btn-secondary" onclick="closeAddModal()">Hủy</button>
-                <button class="btn btn-primary" onclick="saveChapter()">💾 Lưu Chapter</button>
-            </div>
-        </div>
+    <div class="story-tabs">
+        <button class="tab active">📚 Chapters</button>
+        <button class="tab">🎨 Arts</button>
+        <button class="tab">💬 Bình luận</button>
+        <button class="tab">🔗 Liên quan</button>
     </div>
 
-    <!-- Modal sửa chapter -->
-    <div class="modal" id="editModal">
-        <div class="modal-content">
-            <div class="modal-header">✏️ Sửa Chapter</div>
-            
-            <div class="form-group">
-                <label class="form-label">Tên Chapter</label>
-                <input type="text" class="form-input" id="editChapterTitleInput" 
-                       placeholder="Ví dụ: Chapter 1: Khởi đầu">
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Nội dung Chapter</label>
-                <textarea class="form-textarea" id="editChapterContentInput" 
-                          placeholder="Paste nội dung truyện vào đây..."></textarea>
-            </div>
-            
-            <div class="modal-buttons">
-                <button class="btn btn-secondary" onclick="closeEditModal()">Hủy</button>
-                <button class="btn btn-danger" onclick="confirmDeleteCurrentChapter()">🗑️ Xóa</button>
-                <button class="btn btn-primary" onclick="saveEditChapter()">💾 Lưu</button>
-            </div>
-        </div>
+    <div id="homeChapters"></div>
+</div>
+
+<!-- READER -->
+<div class="content-wrapper hidden" id="readerPage">
+    <h2 class="chapter-title" id="chapterTitle"></h2>
+    <div id="chapterContent"></div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer-nav">
+    <div class="progress-bar"><div id="progress" class="progress-fill"></div></div>
+    <div class="chapter-selector">
+        <button class="nav-btn" onclick="prevChapter()">←</button>
+        <button class="dropdown-btn" onclick="toggleDropdown()" id="currentChapter">Chọn chapter</button>
+        <button class="nav-btn" onclick="nextChapter()">→</button>
     </div>
+    <div class="dropdown-menu" id="dropdown"></div>
+</div>
 
-    <!-- Modal đổi ảnh banner -->
-    <div class="modal" id="bannerModal">
-        <div class="modal-content" style="max-width: 400px;">
-            <div class="modal-header">📷 Đổi Ảnh Banner</div>
-            
-            <div class="form-group">
-                <label class="form-label">Link ảnh (URL):</label>
-                <input type="text" class="form-input" id="bannerUrlInput" 
-                       placeholder="https://i.imgur.com/abc123.jpg">
-                <div class="password-hint">
-                    💡 Hướng dẫn:<br>
-                    1. Upload ảnh lên Imgur.com<br>
-                    2. Click chuột phải → Copy image address<br>
-                    3. Paste vào ô trên
-                </div>
-            </div>
-            
-            <div class="modal-buttons">
-                <button class="btn btn-secondary" onclick="closeBannerModal()">Hủy</button>
-                <button class="btn btn-primary" onclick="saveBanner()">💾 Lưu ảnh</button>
-            </div>
-        </div>
-    </div>
+<script>
+/* ===== DATA ===== */
+const story={
+ title:"Giải thoát tớ đi",
+ author:"Daiba Chaya",
+ group:"ILAS",
+ status:"Đã hoàn thành",
+ update:"16/1/2026",
+ views:"10.8K",
+ follows:103,
+ tags:["All Girl","Doujinshi","Futanari"],
+ cover:"https://i.redd.it/fd92bpdhjvad1.png"
+};
 
-    <script>
-        // Biến toàn cục
-        let chapters = JSON.parse(localStorage.getItem('chapters')) || [];
-        let currentChapterIndex = 0;
-        let isEditMode = false;
-        let password = localStorage.getItem('password') || 'admin';
-        let bannerUrl = localStorage.getItem('bannerUrl') || 'https://via.placeholder.com/800x300/6b4ce6/ffffff?text=Click+để+thay+ảnh+banner';
+let chapters=JSON.parse(localStorage.chapters||"[]");
+let bannerUrl=localStorage.banner||story.cover;
+let password=localStorage.password||"admin";
+let edit=false;
+let current=0;
 
-        // Khởi tạo
-        function init() {
-            // Load banner
-            document.getElementById('banner').src = bannerUrl;
-            
-            // Load chapters
-            if (chapters.length > 0) {
-                loadChapter(0);
-            }
-            updateDropdown();
-            updateNavigationButtons();
-            updateUIMode();
-        }
+/* ===== INIT ===== */
+banner.src=bannerUrl;
+storyCover.src=story.cover;
+storyTitle.textContent=story.title;
+author.textContent=story.author;
+group.textContent=story.group;
+status.textContent="✔ "+story.status;
+update.textContent=story.update;
+views.textContent=story.views;
+follows.textContent=story.follows;
+story.tags.forEach(t=>tags.innerHTML+=`<span class="tag">${t}</span>`);
 
-        // Cập nhật giao diện theo mode
-        function updateUIMode() {
-            const modeIndicator = document.getElementById('modeIndicator');
-            const addChapterBtn = document.getElementById('addChapterBtn');
-            const changeBannerBtn = document.getElementById('changeBannerBtn');
-            const editModeBtn = document.getElementById('editModeBtn');
-            
-            if (isEditMode) {
-                modeIndicator.textContent = '✏️ Chế độ Edit';
-                modeIndicator.className = 'mode-indicator mode-edit';
-                addChapterBtn.style.display = 'block';
-                changeBannerBtn.style.display = 'block';
-                editModeBtn.textContent = '📖';
-                editModeBtn.onclick = exitEditMode;
-            } else {
-                modeIndicator.textContent = '📖 Chế độ Đọc';
-                modeIndicator.className = 'mode-indicator mode-read';
-                addChapterBtn.style.display = 'none';
-                changeBannerBtn.style.display = 'none';
-                editModeBtn.textContent = '✏️';
-                editModeBtn.onclick = showPasswordModal;
-            }
-            
-            updateDropdown();
-        }
+renderHome();
 
-        // Hiển thị modal nhập mật khẩu
-        function showPasswordModal() {
-            document.getElementById('passwordModal').classList.add('show');
-            document.getElementById('passwordInput').value = '';
-            document.getElementById('passwordError').textContent = '';
-            document.getElementById('passwordInput').focus();
-        }
+/* ===== HOME ===== */
+function renderHome(){
+ homePage.classList.remove("hidden");
+ readerPage.classList.add("hidden");
+ homeChapters.innerHTML="";
+ chapters.forEach((c,i)=>{
+   homeChapters.innerHTML+=`<div class="chapter-item" onclick="openChapter(${i})">${c.title}</div>`;
+ });
+}
 
-        // Đóng modal mật khẩu
-        function closePasswordModal() {
-            document.getElementById('passwordModal').classList.remove('show');
-        }
+function continueRead(){ openChapter(current||0); }
 
-        // Enter để submit password
-        function handlePasswordEnter(event) {
-            if (event.key === 'Enter') {
-                checkPassword();
-            }
-        }
+/* ===== READER ===== */
+function openChapter(i){
+ current=i;
+ homePage.classList.add("hidden");
+ readerPage.classList.remove("hidden");
+ renderChapter();
+}
 
-        // Kiểm tra mật khẩu
-        function checkPassword() {
-            const inputPassword = document.getElementById('passwordInput').value;
-            const errorDiv = document.getElementById('passwordError');
-            
-            if (inputPassword === password) {
-                isEditMode = true;
-                updateUIMode();
-                closePasswordModal();
-                errorDiv.textContent = '';
-            } else {
-                errorDiv.textContent = '❌ Sai mật khẩu! Thử lại.';
-            }
-        }
+function renderChapter(){
+ const ch=chapters[current];
+ if(!ch) return;
+ chapterTitle.textContent=ch.title;
+ currentChapter.textContent=ch.title;
+ chapterContent.innerHTML=ch.content;
+ renderDropdown();
+ window.scrollTo(0,0);
+}
 
-        // Đổi mật khẩu
-        function changePassword() {
-            const newPassword = document.getElementById('newPasswordInput').value.trim();
-            
-            if (!newPassword) {
-                alert('⚠️ Vui lòng nhập mật khẩu mới!');
-                return;
-            }
-            
-            if (newPassword.length < 3) {
-                alert('⚠️ Mật khẩu phải có ít nhất 3 ký tự!');
-                return;
-            }
-            
-            password = newPassword;
-            localStorage.setItem('password', password);
-            alert('✅ Đã đổi mật khẩu thành công!');
-            document.getElementById('newPasswordInput').value = '';
-        }
+function renderDropdown(){
+ dropdown.innerHTML="";
+ chapters.forEach((c,i)=>{
+   dropdown.innerHTML+=`<div class="dropdown-item" onclick="openChapter(${i})">${c.title}</div>`;
+ });
+}
 
-        // Thoát chế độ edit
-        function exitEditMode() {
-            isEditMode = false;
-            updateUIMode();
-        }
+function toggleDropdown(){ dropdown.classList.toggle("show"); }
+function prevChapter(){ if(current>0) openChapter(current-1); }
+function nextChapter(){ if(current<chapters.length-1) openChapter(current+1); }
 
-        // Hiển thị modal đổi banner
-        function showBannerModal() {
-            if (!isEditMode) return;
-            document.getElementById('bannerModal').classList.add('show');
-            document.getElementById('bannerUrlInput').value = bannerUrl;
-        }
+/* ===== HOME BTN ===== */
+function showHome(){ renderHome(); }
 
-        // Đóng modal banner
-        function closeBannerModal() {
-            document.getElementById('bannerModal').classList.remove('show');
-        }
+/* ===== SCROLL ===== */
+window.addEventListener("scroll",()=>{
+ const h=document.documentElement.scrollHeight-innerHeight;
+ progress.style.width=(scrollY/h*100)+"%";
+});
+</script>
 
-        // Lưu ảnh banner
-        function saveBanner() {
-            const url = document.getElementById('bannerUrlInput').value.trim();
-            
-            if (!url) {
-                alert('⚠️ Vui lòng nhập link ảnh!');
-                return;
-            }
-            
-            // Kiểm tra xem có phải là URL hợp lệ không
-            if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                alert('⚠️ Link phải bắt đầu bằng http:// hoặc https://');
-                return;
-            }
-            
-            bannerUrl = url;
-            localStorage.setItem('bannerUrl', bannerUrl);
-            document.getElementById('banner').src = bannerUrl;
-            closeBannerModal();
-            alert('✅ Đã đổi ảnh banner thành công!');
-        }
-
-        // Hiển thị modal thêm chapter
-        function showAddModal() {
-            if (!isEditMode) {
-                alert('⚠️ Bạn cần vào chế độ Edit để thêm chapter!');
-                return;
-            }
-            document.getElementById('addModal').classList.add('show');
-            document.getElementById('chapterTitleInput').value = '';
-            document.getElementById('chapterContentInput').value = '';
-        }
-
-        // Đóng modal thêm chapter
-        function closeAddModal() {
-            document.getElementById('addModal').classList.remove('show');
-        }
-
-        // Lưu chapter mới
-        function saveChapter() {
-            const title = document.getElementById('chapterTitleInput').value.trim();
-            const content = document.getElementById('chapterContentInput').value.trim();
-            
-            if (!title) {
-                alert('⚠️ Vui lòng nhập tên chapter!');
-                return;
-            }
-            
-            if (!content) {
-                alert('⚠️ Vui lòng nhập nội dung chapter!');
-                return;
-            }
-            
-            // Tách content thành các đoạn văn
-            const paragraphs = content.split('\n').filter(p => p.trim() !== '');
-            const formattedContent = paragraphs.map(p => 
-                `<div class="text-content">${p.trim()}</div>`
-            ).join('');
-            
-            // Thêm chapter mới
-            const newChapter = {
-                id: chapters.length + 1,
-                title: title,
-                content: formattedContent
-            };
-            
-            chapters.push(newChapter);
-            localStorage.setItem('chapters', JSON.stringify(chapters));
-            
-            updateDropdown();
-            loadChapter(chapters.length - 1);
-            closeAddModal();
-            
-            alert('✅ Đã thêm chapter mới thành công!');
-        }
-
-        // Xóa chapter
-        function deleteChapter(index, event) {
-            event.stopPropagation();
-            
-            if (!isEditMode) {
-                alert('⚠️ Bạn cần vào chế độ Edit để xóa chapter!');
-                return;
-            }
-            
-            if (confirm('❌ Bạn có chắc muốn xóa chapter này?')) {
-                chapters.splice(index, 1);
-                
-                // Cập nhật lại ID
-                chapters.forEach((ch, i) => {
-                    ch.id = i + 1;
-                });
-                
-                localStorage.setItem('chapters', JSON.stringify(chapters));
-                
-                if (chapters.length > 0) {
-                    loadChapter(Math.min(currentChapterIndex, chapters.length - 1));
-                } else {
-                    currentChapterIndex = 0;
-                    document.getElementById('chapterTitle').textContent = 'Chưa có chapter nào';
-                    document.getElementById('chapterContent').innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📖</div>
-                            <p>Nhấn nút ✏️ ở góc trên để vào chế độ chỉnh sửa và thêm chapter đầu tiên!</p>
-                        </div>
-                    `;
-                }
-                
-                updateDropdown();
-                updateNavigationButtons();
-            }
-        }
-
-        // Cập nhật dropdown
-        function updateDropdown() {
-            const menu = document.getElementById('dropdownMenu');
-            menu.innerHTML = '';
-            
-            if (chapters.length === 0) {
-                menu.innerHTML = '<div class="dropdown-item">Chưa có chapter nào</div>';
-                return;
-            }
-            
-            chapters.forEach((chapter, index) => {
-                const item = document.createElement('div');
-                item.className = 'dropdown-item';
-                
-                const titleSpan = document.createElement('span');
-                titleSpan.textContent = chapter.title;
-                titleSpan.style.flex = '1';
-                titleSpan.onclick = () => {
-                    loadChapter(index);
-                    toggleDropdown();
-                };
-                
-                item.appendChild(titleSpan);
-                
-                // Chỉ hiện nút sửa/xóa khi ở chế độ edit
-                if (isEditMode) {
-                    const editBtn = document.createElement('button');
-                    editBtn.className = 'delete-chapter-btn';
-                    editBtn.style.backgroundColor = '#2196F3';
-                    editBtn.textContent = '✏️';
-                    editBtn.onclick = (e) => showEditModal(index, e);
-                    item.appendChild(editBtn);
-                    
-                    const deleteBtn = document.createElement('button');
-                    deleteBtn.className = 'delete-chapter-btn';
-                    deleteBtn.textContent = '🗑️';
-                    deleteBtn.onclick = (e) => deleteChapter(index, e);
-                    item.appendChild(deleteBtn);
-                }
-                
-                menu.appendChild(item);
-            });
-        }
-
-        // Load chapter
-        function loadChapter(index) {
-            if (chapters.length === 0) return;
-            
-            currentChapterIndex = index;
-            const chapter = chapters[index];
-            
-            document.getElementById('chapterTitle').textContent = chapter.title;
-            document.getElementById('currentChapter').textContent = chapter.title;
-            document.getElementById('chapterContent').innerHTML = chapter.content;
-            
-            // Update dropdown active state
-            const items = document.querySelectorAll('.dropdown-item');
-            items.forEach((item, i) => {
-                item.classList.toggle('active', i === index);
-            });
-            
-            updateNavigationButtons();
-            window.scrollTo(0, 0);
-        }
-
-        // Toggle dropdown
-        function toggleDropdown() {
-            document.getElementById('dropdownMenu').classList.toggle('show');
-        }
-
-        // Close dropdown and modals when clicking outside
-        window.onclick = function(event) {
-            // Close dropdown
-            if (!event.target.matches('.dropdown-btn') && !event.target.closest('.dropdown-btn')) {
-                const dropdown = document.getElementById('dropdownMenu');
-                if (dropdown.classList.contains('show')) {
-                    dropdown.classList.remove('show');
-                }
-            }
-            
-            // Close modals
-            if (event.target.classList.contains('modal')) {
-                event.target.classList.remove('show');
-            }
-        }
-
-        // Navigation
-        function prevChapter() {
-            if (currentChapterIndex > 0) {
-                loadChapter(currentChapterIndex - 1);
-            }
-        }
-
-        function nextChapter() {
-            if (currentChapterIndex < chapters.length - 1) {
-                loadChapter(currentChapterIndex + 1);
-            }
-        }
-
-        function updateNavigationButtons() {
-            document.getElementById('prevBtn').disabled = currentChapterIndex === 0 || chapters.length === 0;
-            document.getElementById('nextBtn').disabled = currentChapterIndex === chapters.length - 1 || chapters.length === 0;
-        }
-
-        // Hiển thị modal sửa chapter
-        function showEditModal(index, event) {
-            event.stopPropagation();
-            
-            if (!isEditMode) {
-                alert('⚠️ Bạn cần vào chế độ Edit để sửa chapter!');
-                return;
-            }
-            
-            const chapter = chapters[index];
-            
-            // Lưu index đang sửa
-            window.editingChapterIndex = index;
-            
-            // Lấy nội dung gốc (loại bỏ các thẻ HTML)
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = chapter.content;
-            const textContent = Array.from(tempDiv.querySelectorAll('.text-content'))
-                .map(el => el.textContent)
-                .join('\n\n');
-            
-            document.getElementById('editChapterTitleInput').value = chapter.title;
-            document.getElementById('editChapterContentInput').value = textContent;
-            document.getElementById('editModal').classList.add('show');
-            
-            toggleDropdown();
-        }
-
-        // Đóng modal sửa chapter
-        function closeEditModal() {
-            document.getElementById('editModal').classList.remove('show');
-            window.editingChapterIndex = null;
-        }
-
-        // Lưu chapter sau khi sửa
-        function saveEditChapter() {
-            const title = document.getElementById('editChapterTitleInput').value.trim();
-            const content = document.getElementById('editChapterContentInput').value.trim();
-            
-            if (!title) {
-                alert('⚠️ Vui lòng nhập tên chapter!');
-                return;
-            }
-            
-            if (!content) {
-                alert('⚠️ Vui lòng nhập nội dung chapter!');
-                return;
-            }
-            
-            // Tách content thành các đoạn văn
-            const paragraphs = content.split('\n').filter(p => p.trim() !== '');
-            const formattedContent = paragraphs.map(p => 
-                `<div class="text-content">${p.trim()}</div>`
-            ).join('');
-            
-            // Cập nhật chapter
-            chapters[window.editingChapterIndex] = {
-                id: chapters[window.editingChapterIndex].id,
-                title: title,
-                content: formattedContent
-            };
-            
-            localStorage.setItem('chapters', JSON.stringify(chapters));
-            
-            updateDropdown();
-            loadChapter(window.editingChapterIndex);
-            closeEditModal();
-            
-            alert('✅ Đã cập nhật chapter thành công!');
-        }
-
-        // Xóa chapter hiện tại từ modal sửa
-        function confirmDeleteCurrentChapter() {
-            if (confirm('❌ Bạn có chắc muốn xóa chapter này?')) {
-                chapters.splice(window.editingChapterIndex, 1);
-                
-                // Cập nhật lại ID
-                chapters.forEach((ch, i) => {
-                    ch.id = i + 1;
-                });
-                
-                localStorage.setItem('chapters', JSON.stringify(chapters));
-                closeEditModal();
-                
-                if (chapters.length > 0) {
-                    loadChapter(Math.min(window.editingChapterIndex, chapters.length - 1));
-                } else {
-                    currentChapterIndex = 0;
-                    document.getElementById('chapterTitle').textContent = 'Chưa có chapter nào';
-                    document.getElementById('chapterContent').innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📖</div>
-                            <p>Nhấn nút ✏️ ở góc trên để vào chế độ chỉnh sửa và thêm chapter đầu tiên!</p>
-                        </div>
-                    `;
-                }
-                
-                updateDropdown();
-                updateNavigationButtons();
-                alert('✅ Đã xóa chapter!');
-            }
-        }
-
-        // Progress bar khi scroll
-        window.addEventListener('scroll', function() {
-            const windowHeight = window.innerHeight;
-            const documentHeight = document.documentElement.scrollHeight;
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            const scrollPercent = (scrollTop / (documentHeight - windowHeight)) * 100;
-            
-            document.getElementById('progressFill').style.width = scrollPercent + '%';
-        });
-
-        // Khởi chạy
-        init();
-    </script>
 </body>
 </html>
