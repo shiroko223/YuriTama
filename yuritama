@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đọc Truyện</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background-color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Header cố định */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .header-left, .header-right {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b4ce6;
+            padding: 5px;
+        }
+
+        /* Banner truyện */
+        .banner {
+            margin-top: 60px;
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        /* Nội dung cuộn */
+        .content-wrapper {
+            padding: 20px 15px 100px 15px;
+            min-height: calc(100vh - 310px);
+        }
+
+        .chapter-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* Văn bản truyện */
+        .text-content {
+            line-height: 1.8;
+            font-size: 16px;
+            color: #333;
+            text-align: justify;
+            margin-bottom: 20px;
+        }
+
+        /* Footer navigation cố định */
+        .footer-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        /* Thanh tiến trình */
+        .progress-bar {
+            width: 100%;
+            height: 3px;
+            background-color: #f0f0f0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #6b4ce6;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* Chapter selector */
+        .chapter-selector {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #6b4ce6;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        .nav-btn:disabled {
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .chapter-dropdown {
+            flex: 1;
+            margin: 0 15px;
+            position: relative;
+        }
+
+        .dropdown-btn {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            right: 0;
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .dropdown-item.active {
+            background-color: #6b4ce6;
+            color: white;
+        }
+
+        .delete-chapter-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .dropdown-item.active .delete-chapter-btn {
+            background: #ff6666;
+        }
+
+        /* Scroll to top button */
+        .scroll-top {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: #6b4ce6;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 99;
+        }
+
+        .scroll-top.show {
+            display: flex;
+        }
+
+        /* Modal thêm chapter */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 15px;
+            padding: 25px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            min-height: 200px;
+            resize: vertical;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background-color: #6b4ce6;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .add-chapter-btn {
+            position: fixed;
+            bottom: 90px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 28px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 99;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <button class="icon-btn" onclick="alert('Trang chủ')">🏠</button>
+        </div>
+        <div class="header-right">
+            <button class="icon-btn" onclick="showAddModal()">➕</button>
+            <button class="icon-btn">⚙️</button>
+        </div>
+    </div>
+
+    <!-- Banner -->
+    <img src="https://via.placeholder.com/800x300/6b4ce6/ffffff?text=Banner+Truyen" 
+         alt="Banner" class="banner" id="banner">
+
+    <!-- Nội dung -->
+    <div class="content-wrapper" id="contentWrapper">
+        <h2 class="chapter-title" id="chapterTitle">Chưa có chapter nào</h2>
+        <div id="chapterContent">
+            <div class="empty-state">
+                <div class="empty-state-icon">📖</div>
+                <p>Nhấn nút ➕ ở góc trên bên phải hoặc nút + ở góc dưới bên trái để thêm chapter đầu tiên!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nút thêm chapter (góc dưới trái) -->
+    <button class="add-chapter-btn" onclick="showAddModal()">+</button>
+
+    <!-- Nút scroll to top -->
+    <button class="scroll-top" id="scrollTopBtn" onclick="scrollToTop()">↑</button>
+
+    <!-- Footer Navigation -->
+    <div class="footer-nav">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="chapter-selector">
+            <button class="nav-btn" id="prevBtn" onclick="prevChapter()">←</button>
+            
+            <div class="chapter-dropdown">
+                <button class="dropdown-btn" onclick="toggleDropdown()">
+                    <span id="currentChapter">Chọn chapter</span>
+                    <span>▼</span>
+                </button>
+                <div class="dropdown-menu" id="dropdownMenu"></div>
+            </div>
+            
+            <button class="nav-btn" id="nextBtn" onclick="nextChapter()">→</button>
+        </div>
+    </div>
+
+    <!-- Modal thêm chapter -->
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <div class="modal-header">✍️ Thêm Chapter Mới</div>
+            
+            <div class="form-group">
+                <label class="form-label">Tên Chapter (ví dụ: Chapter 1: Khởi đầu)</label>
+                <input type="text" class="form-input" id="chapterTitleInput" 
+                       placeholder="Nhập tên chapter...">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Nội dung Chapter</label>
+                <textarea class="form-textarea" id="chapterContentInput" 
+                          placeholder="Paste nội dung truyện vào đây...
+
+Mỗi đoạn văn sẽ tự động được ngăn cách.
+Chỉ cần paste và nhấn Lưu!"></textarea>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeAddModal()">Hủy</button>
+                <button class="btn btn-primary" onclick="saveChapter()">💾 Lưu Chapter</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load chapters từ localStorage
+        let chapters = JSON.parse(localStorage.getItem('chapters')) || [];
+        let currentChapterIndex = 0;
+
+        // Khởi tạo
+        function init() {
+            if (chapters.length > 0) {
+                loadChapter(0);
+            }
+            updateDropdown();
+            updateNavigationButtons();
+        }
+
+        // Hiển thị modal thêm chapter
+        function showAddModal() {
+            document.getElementById('addModal').classList.add('show');
+            document.getElementById('chapterTitleInput').value = '';
+            document.getElementById('chapterContentInput').value = '';
+        }
+
+        // Đóng modal
+        function closeAddModal() {
+            document.getElementById('addModal').classList.remove('show');
+        }
+
+        // Lưu chapter mới
+        function saveChapter() {
+            const title = document.getElementById('chapterTitleInput').value.trim();
+            const content = document.getElementById('chapterContentInput').value.trim();
+            
+            if (!title) {
+                alert('⚠️ Vui lòng nhập tên chapter!');
+                return;
+            }
+            
+            if (!content) {
+                alert('⚠️ Vui lòng nhập nội dung chapter!');
+                return;
+            }
+            
+            // Tách content thành các đoạn văn
+            const paragraphs = content.split('\n').filter(p => p.trim() !== '');
+            const formattedContent = paragraphs.map(p => 
+                `<div class="text-content">${p.trim()}</div>`
+            ).join('');
+            
+            // Thêm chapter mới
+            const newChapter = {
+                id: chapters.length + 1,
+                title: title,
+                content: formattedContent
+            };
+            
+            chapters.push(newChapter);
+            
+            // Lưu vào localStorage
+            localStorage.setItem('chapters', JSON.stringify(chapters));
+            
+            // Cập nhật giao diện
+            updateDropdown();
+            loadChapter(chapters.length - 1);
+            closeAddModal();
+            
+            alert('✅ Đã thêm chapter mới thành công!');
+        }
+
+        // Xóa chapter
+        function deleteChapter(index, event) {
+            event.stopPropagation();
+            
+            if (confirm('❌ Bạn có chắc muốn xóa chapter này?')) {
+                chapters.splice(index, 1);
+                
+                // Cập nhật lại ID
+                chapters.forEach((ch, i) => {
+                    ch.id = i + 1;
+                });
+                
+                localStorage.setItem('chapters', JSON.stringify(chapters));
+                
+                if (chapters.length > 0) {
+                    loadChapter(Math.min(currentChapterIndex, chapters.length - 1));
+                } else {
+                    currentChapterIndex = 0;
+                    document.getElementById('chapterTitle').textContent = 'Chưa có chapter nào';
+                    document.getElementById('chapterContent').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📖</div>
+                            <p>Nhấn nút ➕ để thêm chapter mới!</p>
+                        </div>
+                    `;
+                }
+                
+                updateDropdown();
+                updateNavigationButtons();
+            }
+        }
+
+        // Cập nhật dropdown
+        function updateDropdown() {
+            const menu = document.getElementById('dropdownMenu');
+            menu.innerHTML = '';
+            
+            if (chapters.length === 0) {
+                menu.innerHTML = '<div class="dropdown-item">Chưa có chapter nào</div>';
+                return;
+            }
+            
+            chapters.forEach((chapter, index) => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                
+                const titleSpan = document.createElement('span');
+                titleSpan.textContent = chapter.title;
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-chapter-btn';
+                deleteBtn.textContent = '🗑️';
+                deleteBtn.onclick = (e) => deleteChapter(index, e);
+                
+                item.appendChild(titleSpan);
+                item.appendChild(deleteBtn);
+                
+                item.onclick = () => {
+                    loadChapter(index);
+                    toggleDropdown();
+                };
+                
+                menu.appendChild(item);
+            });
+        }
+
+        // Load chapter
+        function loadChapter(index) {
+            if (chapters.length === 0) return;
+            
+            currentChapterIndex = index;
+            const chapter = chapters[index];
+            
+            document.getElementById('chapterTitle').textContent = chapter.title;
+            document.getElementById('currentChapter').textContent = chapter.title;
+            document.getElementById('chapterContent').innerHTML = chapter.content;
+            
+            // Update dropdown active state
+            const items = document.querySelectorAll('.dropdown-item');
+            items.forEach((item, i) => {
+                item.classList.toggle('active', i === index);
+            });
+            
+            updateNavigationButtons();
+            window.scrollTo(0, 0);
+        }
+
+        // Toggle dropdown
+        function toggleDropdown() {
+            document.getElementById('dropdownMenu').classList.toggle('show');
+        }
+
+        // Close dropdown when clicking outside
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropdown-btn') && !event.target.closest('.dropdown-btn')) {
+                const dropdown = document.getElementById('dropdownMenu');
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+            
+            // Close modal when clicking outside
+            const modal = document.getElementById('addModal');
+            if (event.target === modal) {
+                closeAddModal();
+            }
+        }
+
+        // Navigation
+        function prevChapter() {
+            if (currentChapterIndex > 0) {
+                loadChapter(currentChapterIndex - 1);
+            }
+        }
+
+        function nextChapter() {
+            if (currentChapterIndex < chapters.length - 1) {
+                loadChapter(currentChapterIndex + 1);
+            }
+        }
+
+        function updateNavigationButtons() {
+            document.getElementById('prevBtn').disabled = currentChapterIndex === 0 || chapters.length === 0;
+            document.getElementById('nextBtn').disabled = currentChapterIndex === chapters.length - 1 || chapters.length === 0;
+        }
+
+        // Progress bar khi scroll
+        window.addEventListener('scroll', function() {
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollPercent = (scrollTop / (documentHeight - windowHeight)) * 100;
+            
+            document.getElementById('progressFill').style.width = scrollPercent + '%';
+            
+            const scrollTopBtn = document.getElementById('scrollTopBtn');
+            if (scrollTop > 300) {
+                scrollTopBtn.classList.add('show');
+            } else {
+                scrollTopBtn.classList.remove('show');
+            }
+        });
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Khởi chạy
+        init();
+    </script>
+</body>
+</html>
