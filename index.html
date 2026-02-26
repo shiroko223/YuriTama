@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Yuri Garden Reader</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Segoe UI,Arial;background:#fff}
+
+/* HEADER */
+.header{
+  position:fixed;top:0;left:0;right:0;height:60px;
+  background:#fff;display:flex;align-items:center;
+  justify-content:space-between;padding:0 15px;
+  box-shadow:0 2px 10px rgba(0,0,0,.05);z-index:100;
+}
+.home-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;cursor:pointer;border:2px solid #e3c9ff}
+.mode-indicator{font-size:12px;padding:5px 10px;border-radius:20px;cursor:pointer;user-select:none}
+.mode-read{background:#e3f2fd;color:#1976d2}
+.mode-edit{background:#fff3e0;color:#f57c00}
+.icon-btn{font-size:22px;background:none;border:none;cursor:pointer;color:#7b3fe4}
+
+/* BANNER */
+.banner-container{margin-top:60px;position:relative}
+.banner{width:100%;height:260px;object-fit:cover;display:block}
+.change-banner-btn{
+  position:absolute;bottom:15px;right:15px;
+  padding:8px 14px;border-radius:20px;
+  border:none;background:rgba(0,0,0,.6);
+  color:#fff;display:none;cursor:pointer
+}
+
+.hidden{display:none!important}
+
+/* HOME */
+#homePage{padding:25px 15px 120px}
+.story-header{display:flex;gap:20px}
+.story-cover{width:200px;border-radius:12px;flex-shrink:0;object-fit:cover}
+.story-info{flex:1}
+.story-info h1{color:#7b3fe4;margin-bottom:8px;font-size:17px;line-height:1.3}
+.tag-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.tag{background:#ffe3f1;color:#c2185b;padding:4px 11px;border-radius:20px;font-size:12px}
+.story-meta{font-size:13px;color:#666;margin:5px 0}
+.status-badge{
+  display:inline-block;
+  padding:5px 16px;border-radius:50px;
+  font-size:12px;font-weight:700;
+  letter-spacing:.3px;cursor:default;
+}
+.status-done{background:#4caf50;color:#fff}
+.status-ongoing{background:#ffe066;color:#7a6000}
+.story-actions{margin-top:10px}
+
+/* READER BG */
+#readerPage{padding:25px 15px 120px;background:#eae4d3;min-height:100vh}
+.story-tabs{display:flex;gap:10px;margin:28px 0 18px;flex-wrap:wrap}
+.tab{padding:9px 18px;border-radius:20px;border:none;background:#f3e5ff;cursor:pointer;font-size:14px;transition:.2s}
+.tab.active{background:#7b3fe4;color:#fff}
+
+/* CHAPTER LIST */
+.chapter-item{
+  position:relative;padding:14px 15px;border-radius:12px;
+  background:#fafafa;margin-bottom:10px;cursor:pointer;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.chapter-item:hover{background:#ece3ff}
+.chapter-item-title{font-size:14px;font-weight:500;color:#333}
+.chapter-item-date{font-size:13px;font-weight:600;color:#a8a8a8;flex-shrink:0;margin-left:10px}
+
+/* ARTS INLINE */
+.arts-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
+  gap:12px;
+}
+.art-item{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:1;background:#f3e5ff;cursor:pointer}
+.art-item img{width:100%;height:100%;object-fit:cover;display:block}
+.art-delete-btn{
+  position:absolute;top:5px;right:5px;
+  background:rgba(220,0,0,.75);color:#fff;
+  border:none;border-radius:50%;width:26px;height:26px;
+  font-size:13px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.art-add-btn{
+  border:2px dashed #c9a0f0;background:#f9f0ff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:38px;color:#7b3fe4;cursor:pointer;
+  border-radius:10px;aspect-ratio:1;
+}
+
+/* COMMENTS INLINE */
+.comment-form{margin-bottom:18px}
+.comment-name-input{
+  width:100%;padding:9px 12px;border-radius:8px;
+  border:1px solid #ddd;font-size:14px;margin-bottom:8px;
+}
+.comment-textarea{
+  width:100%;padding:9px 12px;border-radius:8px;
+  border:1px solid #ddd;font-size:14px;min-height:90px;
+  resize:vertical;font-family:inherit;
+}
+.comment-submit{
+  margin-top:8px;padding:9px 22px;background:#7b3fe4;
+  color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;
+}
+.comment-item{
+  padding:12px 0;border-bottom:1px solid #f0e6ff;
+}
+.comment-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.comment-author{font-weight:600;font-size:13px;color:#7b3fe4}
+.comment-time{font-size:11px;color:#bbb}
+.comment-body{font-size:14px;color:#333;line-height:1.6}
+.comment-delete-btn{
+  background:none;border:none;color:#ffaaaa;font-size:13px;
+  cursor:pointer;padding:2px 6px;border-radius:6px;
+  flex-shrink:0;
+}
+.comment-delete-btn:hover{background:#fff0f0;color:#ff4444}
+
+/* READER */
+#readerPage{padding:25px 15px 120px;background:#eae4d3;min-height:100vh}
+.chapter-title{font-size:22px;margin-bottom:20px}
+
+/* FOOTER */
+.footer-nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:#fff;box-shadow:0 -2px 10px rgba(0,0,0,.1);
+  z-index:90;
+}
+.progress-bar{height:3px;background:#eee}
+.progress-fill{height:100%;background:#7b3fe4;width:0%;transition:width .1s}
+.chapter-selector{display:flex;align-items:center;padding:10px 12px;gap:6px}
+.nav-btn{font-size:22px;border:none;background:none;color:#7b3fe4;padding:4px;cursor:pointer}
+.dropdown-btn{
+  flex:1;padding:9px 12px;
+  border-radius:8px;border:1px solid #ddd;
+  background:#f5f5f5;cursor:pointer;font-size:13px;text-align:left;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+}
+.dropdown-btn-title{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dropdown-btn-date{font-size:12px;font-weight:600;color:#a8a8a8;white-space:nowrap;flex-shrink:0}
+.dropdown-menu{
+  position:absolute;bottom:58px;left:15px;right:15px;
+  background:#fff;border-radius:8px;
+  box-shadow:0 -2px 12px rgba(0,0,0,.15);
+  max-height:300px;overflow:auto;
+  display:none;z-index:50
+}
+.dropdown-menu.show{display:block}
+.dropdown-item{padding:12px;border-bottom:1px solid #eee;cursor:pointer;font-size:14px}
+.dropdown-item:hover{background:#f5f5f5}
+
+/* LIGHTBOX */
+.lightbox{
+  position:fixed;inset:0;background:rgba(0,0,0,.93);
+  display:none;align-items:center;justify-content:center;
+  z-index:300;cursor:zoom-out;
+}
+.lightbox.show{display:flex}
+.lightbox img{max-width:96vw;max-height:93vh;border-radius:8px;object-fit:contain}
+.lightbox-close{
+  position:absolute;top:14px;right:18px;
+  font-size:28px;color:#fff;cursor:pointer;
+  background:none;border:none;line-height:1;
+}
+
+/* MODAL */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:200}
+.modal.show{display:flex}
+.modal-content{background:#fff;padding:25px;border-radius:15px;width:100%;max-width:450px}
+.form-input{width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;margin-top:8px;font-size:14px}
+.form-textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;margin-top:8px;min-height:160px;font-size:14px;font-family:inherit}
+.btn{padding:10px;border:none;border-radius:8px;cursor:pointer;font-size:14px}
+.btn-primary{background:#7b3fe4;color:#fff}
+.btn-secondary{background:#eee}
+.btn-danger{background:#ff4444;color:#fff}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <img class="home-avatar"
+       src="https://img.sanishtech.com/u/b88cdc0f9f5ac15975f7c83aab32d554.webp"
+       onclick="showHome()" alt="Home">
+  <span id="modeIndicator" class="mode-indicator mode-read" onclick="showPassword()">📖 Chế độ Đọc</span>
+  <div>
+    <button class="icon-btn hidden" id="editBtn" onclick="showManage()">✏️</button>
+  </div>
+</div>
+
+<!-- BANNER -->
+<div class="banner-container" id="bannerContainer">
+  <img id="banner" class="banner">
+  <button class="change-banner-btn" id="bannerBtn" onclick="showBanner()">📷 Đổi ảnh</button>
+</div>
+
+<!-- HOME -->
+<div id="homePage">
+  <div class="story-header">
+    <img id="storyCover" class="story-cover">
+    <div class="story-info">
+      <h1 id="storyTitle"></h1>
+      <div class="tag-list" id="tags"></div>
+      <div style="margin:6px 0;display:flex;align-items:center;gap:8px">
+        <span class="status-badge" id="statusBadge"></span>
+        <button id="statusEditBtn" onclick="showStatusModal()" style="display:none;background:none;border:none;cursor:pointer;font-size:14px;color:#7b3fe4;padding:2px 4px" title="Chỉnh status">✏️</button>
+      </div>
+      <div style="font-size:13px"><b>Tác giả:</b> <span id="author"></span></div>
+      <div style="font-size:13px;margin-top:3px"><b>Họa sĩ:</b> <span id="artist"></span></div>
+      <div class="story-actions">
+        <button class="btn btn-primary" onclick="continueRead()" style="margin-top:10px;font-size:13px">📖 Tiếp tục đọc</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="story-tabs">
+    <button class="tab active" id="tab0" onclick="switchTab(0)">📚 Chapters</button>
+    <button class="tab" id="tab1" onclick="switchTab(1)">🎨 Arts</button>
+    <button class="tab" id="tab2" onclick="switchTab(2)">💬 Bình luận</button>
+  </div>
+
+  <!-- CHAPTERS PANEL -->
+  <div id="panelChapters"></div>
+
+  <!-- ARTS PANEL -->
+  <div id="panelArts" class="hidden">
+    <div class="arts-grid" id="artsGrid"></div>
+  </div>
+
+  <!-- COMMENTS PANEL -->
+  <div id="panelComments" class="hidden">
+    <div class="comment-form">
+      <input class="comment-name-input" id="commentName" placeholder="Tên của bạn...">
+      <textarea class="comment-textarea" id="commentText" placeholder="Viết bình luận..."></textarea>
+      <button class="comment-submit" onclick="submitComment()">Gửi 💬</button>
+    </div>
+    <div id="commentList"></div>
+  </div>
+</div>
+
+<!-- READER -->
+<div id="readerPage" class="hidden">
+  <h2 class="chapter-title" id="chapterTitle"></h2>
+  <div id="chapterContent"></div>
+</div>
+
+<!-- FOOTER (chỉ hiện khi đọc) -->
+<div class="footer-nav hidden" id="footerNav">
+  <div class="progress-bar"><div id="progress" class="progress-fill"></div></div>
+  <div class="chapter-selector">
+    <button class="nav-btn" onclick="prevChapter()">←</button>
+    <button class="dropdown-btn" onclick="toggleDropdown()" id="dropdownBtn">
+      <span class="dropdown-btn-title" id="currentChapterTitle">Chọn chapter</span>
+      <span class="dropdown-btn-date" id="footerDate"></span>
+    </button>
+    <button class="nav-btn" onclick="nextChapter()">→</button>
+  </div>
+  <div class="dropdown-menu" id="dropdown"></div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightboxImg" src="">
+</div>
+
+<!-- MODAL MANAGE -->
+<div class="modal" id="manageModal">
+  <div class="modal-content" style="max-height:80vh;overflow-y:auto">
+    <h3 style="margin-bottom:15px;color:#7b3fe4">📚 Quản lý Chapters</h3>
+    <button class="btn btn-primary" style="width:100%;margin-bottom:15px" onclick="showAdd()">➕ Thêm chapter mới</button>
+    <div id="manageList"></div>
+    <button class="btn btn-secondary" style="width:100%;margin-top:10px" onclick="closeModal('manageModal')">Đóng</button>
+  </div>
+</div>
+
+<!-- MODAL ADD/EDIT CHAPTER -->
+<div class="modal" id="addModal" style="align-items:stretch;justify-content:stretch;padding:0">
+  <div class="modal-content" style="max-width:100%;width:100%;height:100%;border-radius:0;display:flex;flex-direction:column;padding:20px">
+    <h3 style="margin-bottom:15px;color:#7b3fe4" id="addModalTitle">➕ Thêm Chapter</h3>
+    <input class="form-input" id="chapTitle" placeholder="Tên chapter" style="margin-top:0">
+    <textarea class="form-textarea" id="chapContent" placeholder="Nội dung chapter" style="margin-top:10px;flex:1;resize:none"></textarea>
+    <div style="display:flex;gap:10px;margin-top:15px">
+      <button class="btn btn-primary" style="flex:1" onclick="saveChapter()">💾 Lưu</button>
+      <button class="btn btn-secondary" style="flex:1" onclick="closeModal('addModal')">Hủy</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL BANNER -->
+<div class="modal" id="bannerModal">
+  <div class="modal-content">
+    <h3 style="margin-bottom:15px;color:#7b3fe4">📷 Đổi ảnh</h3>
+    <label style="font-size:13px;color:#555">URL ảnh Banner:</label>
+    <input class="form-input" id="inputBanner" placeholder="https://...">
+    <label style="font-size:13px;color:#555;margin-top:12px;display:block">URL ảnh Bìa:</label>
+    <input class="form-input" id="inputCover" placeholder="https://...">
+    <p style="font-size:11px;color:#aaa;margin-top:8px">💡 Để trống thì giữ ảnh cũ.</p>
+    <div style="display:flex;gap:10px;margin-top:15px">
+      <button class="btn btn-primary" style="flex:1" onclick="saveBanner()">💾 Lưu</button>
+      <button class="btn btn-secondary" style="flex:1" onclick="closeModal('bannerModal')">Hủy</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ADD ART -->
+<div class="modal" id="artModal">
+  <div class="modal-content">
+    <h3 style="margin-bottom:15px;color:#7b3fe4">🖼️ Thêm ảnh Art</h3>
+    <label style="font-size:13px;color:#555">URL ảnh:</label>
+    <input class="form-input" id="inputArt" placeholder="https://...">
+    <div style="display:flex;gap:10px;margin-top:15px">
+      <button class="btn btn-primary" style="flex:1" onclick="saveArt()">➕ Thêm</button>
+      <button class="btn btn-secondary" style="flex:1" onclick="closeModal('artModal')">Hủy</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL STATUS -->
+<div class="modal" id="statusModal">
+  <div class="modal-content" style="max-width:320px">
+    <h3 style="margin-bottom:18px;color:#7b3fe4">📋 Chỉnh Status</h3>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <button onclick="setStatus('done')" style="padding:12px;border-radius:50px;border:none;background:#4caf50;color:#fff;font-size:14px;font-weight:700;cursor:pointer">✔ Đã hoàn thành</button>
+      <button onclick="setStatus('ongoing')" style="padding:12px;border-radius:50px;border:none;background:#ffe066;color:#7a6000;font-size:14px;font-weight:700;cursor:pointer">⏳ Đang tiến hành</button>
+    </div>
+    <button class="btn btn-secondary" style="width:100%;margin-top:15px" onclick="closeModal('statusModal')">Hủy</button>
+  </div>
+</div>
+
+<script>
+const story={
+  title:"Yuritama: From Third Wheel to Trifecta",
+  author:"Daiba Chaya",
+  artist:"Kuro Shina",
+  tags:["Harem","Romance","School Life","Shoujo Ai","Yuri"],
+  cover:"https://i.redd.it/fd92bpdhjvad1.png"
+};
+
+let chapters = JSON.parse(localStorage.getItem("chapters")||"[]");
+let arts     = JSON.parse(localStorage.getItem("arts")||"[]");
+let comments = JSON.parse(localStorage.getItem("comments")||"[]");
+let bannerUrl = localStorage.getItem("banner")||story.cover;
+let coverUrl  = localStorage.getItem("cover")||story.cover;
+let password  = localStorage.getItem("password")||"Suisei223";
+let statusKey = localStorage.getItem("statusKey")||"done";
+let edit = false;
+let current = 0;
+let editingIndex = -1;
+let activeTab = 0;
+
+/* helpers */
+function fmtDate(d){
+  const dd=String(d.getDate()).padStart(2,'0');
+  const mm=String(d.getMonth()+1).padStart(2,'0');
+  const yyyy=d.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+}
+function fmtDateTime(d){
+  const hh=String(d.getHours()).padStart(2,'0');
+  const mi=String(d.getMinutes()).padStart(2,'0');
+  return `${hh}:${mi} ${fmtDate(d)}`;
+}
+const TODAY = fmtDate(new Date());
+
+/* INIT */
+document.getElementById("banner").src = bannerUrl;
+document.getElementById("storyCover").src = coverUrl;
+document.getElementById("storyTitle").textContent = story.title;
+document.getElementById("author").textContent = story.author;
+document.getElementById("artist").textContent = story.artist;
+story.tags.forEach(t=>{
+  document.getElementById("tags").innerHTML+=`<span class="tag">${t}</span>`;
+});
+renderStatusBadge();
+renderHome();
+
+/* ===== STATUS ===== */
+function renderStatusBadge(){
+  const badge=document.getElementById("statusBadge");
+  if(statusKey==="done"){
+    badge.textContent="✔ Đã hoàn thành";
+    badge.className="status-badge status-done";
+  } else {
+    badge.textContent="⏳ Đang tiến hành";
+    badge.className="status-badge status-ongoing";
+  }
+}
+function showStatusModal(){
+  document.getElementById("statusModal").classList.add("show");
+}
+function setStatus(key){
+  statusKey=key;
+  localStorage.setItem("statusKey",key);
+  renderStatusBadge();
+  closeModal("statusModal");
+}
+
+/* ===== HOME ===== */
+function renderHome(){
+  document.getElementById("homePage").classList.remove("hidden");
+  document.getElementById("readerPage").classList.add("hidden");
+  document.getElementById("footerNav").classList.add("hidden");
+  document.getElementById("bannerContainer").style.display="block";
+  renderActivePanel();
+}
+
+function showHome(){
+  activeTab=0;
+  renderHome();
+  setTabActive(0);
+}
+
+function continueRead(){ openChapter(current||0); }
+
+/* ===== TABS ===== */
+function switchTab(idx){
+  activeTab=idx;
+  setTabActive(idx);
+  renderActivePanel();
+}
+
+function setTabActive(idx){
+  document.querySelectorAll(".tab").forEach((t,i)=>t.classList.toggle("active",i===idx));
+}
+
+function renderActivePanel(){
+  document.getElementById("panelChapters").classList.toggle("hidden", activeTab!==0);
+  document.getElementById("panelArts").classList.toggle("hidden", activeTab!==1);
+  document.getElementById("panelComments").classList.toggle("hidden", activeTab!==2);
+  if(activeTab===0) renderChapterList();
+  if(activeTab===1) renderArts();
+  if(activeTab===2) renderComments();
+}
+
+/* ===== CHAPTER LIST ===== */
+function renderChapterList(){
+  const el=document.getElementById("panelChapters");
+  el.innerHTML="";
+  if(chapters.length===0){
+    el.innerHTML=`<p style="color:#bbb;font-size:14px;padding:20px 0;text-align:center">Chưa có chapter nào.</p>`;
+    return;
+  }
+  chapters.forEach((c,i)=>{
+    el.innerHTML+=`
+      <div class="chapter-item" onclick="openChapter(${i})">
+        <span class="chapter-item-title">${c.title}</span>
+        <span class="chapter-item-date">${TODAY}</span>
+      </div>`;
+  });
+}
+
+/* ===== ARTS ===== */
+function renderArts(){
+  const grid=document.getElementById("artsGrid");
+  grid.innerHTML="";
+  if(edit){
+    grid.innerHTML+=`<div class="art-add-btn" onclick="showArtModal()">＋</div>`;
+  }
+  arts.forEach((url,i)=>{
+    if(edit){
+      grid.innerHTML+=`
+        <div class="art-item">
+          <img src="${url}">
+          <button class="art-delete-btn" onclick="deleteArt(${i})">✕</button>
+        </div>`;
+    } else {
+      grid.innerHTML+=`
+        <div class="art-item" onclick="openLightbox('${url}')">
+          <img src="${url}">
+        </div>`;
+    }
+  });
+  if(!edit && arts.length===0){
+    grid.innerHTML=`<p style="color:#bbb;font-size:14px;padding:20px 0;text-align:center">Chưa có ảnh nào.</p>`;
+  }
+}
+
+function showArtModal(){
+  document.getElementById("inputArt").value="";
+  document.getElementById("artModal").classList.add("show");
+}
+function saveArt(){
+  const url=document.getElementById("inputArt").value.trim();
+  if(!url) return alert("Vui lòng nhập URL ảnh!");
+  arts.push(url);
+  localStorage.setItem("arts",JSON.stringify(arts));
+  closeModal("artModal");
+  renderArts();
+}
+function deleteArt(i){
+  if(!confirm("Xóa ảnh này?")) return;
+  arts.splice(i,1);
+  localStorage.setItem("arts",JSON.stringify(arts));
+  renderArts();
+}
+function openLightbox(url){
+  document.getElementById("lightboxImg").src=url;
+  document.getElementById("lightbox").classList.add("show");
+}
+function closeLightbox(){
+  document.getElementById("lightbox").classList.remove("show");
+  document.getElementById("lightboxImg").src="";
+}
+
+/* ===== COMMENTS ===== */
+function renderComments(){
+  const list=document.getElementById("commentList");
+  list.innerHTML="";
+  if(comments.length===0){
+    list.innerHTML=`<p style="color:#bbb;font-size:14px;padding:10px 0;text-align:center">Chưa có bình luận nào.</p>`;
+    return;
+  }
+  [...comments].reverse().forEach((c,ri)=>{
+    const realIdx=comments.length-1-ri;
+    list.innerHTML+=`
+      <div class="comment-item">
+        <div class="comment-header">
+          <span class="comment-author">${c.name}</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="comment-time">${c.time}</span>
+            ${edit?`<button class="comment-delete-btn" onclick="deleteComment(${realIdx})">🗑️</button>`:''}
+          </div>
+        </div>
+        <div class="comment-body">${c.text}</div>
+      </div>`;
+  });
+}
+function submitComment(){
+  const name=document.getElementById("commentName").value.trim()||"Ẩn danh";
+  const text=document.getElementById("commentText").value.trim();
+  if(!text) return;
+  comments.push({name, text, time: fmtDateTime(new Date())});
+  localStorage.setItem("comments",JSON.stringify(comments));
+  document.getElementById("commentText").value="";
+  renderComments();
+}
+function deleteComment(i){
+  if(!confirm("Xóa bình luận này?")) return;
+  comments.splice(i,1);
+  localStorage.setItem("comments",JSON.stringify(comments));
+  renderComments();
+}
+
+/* ===== READER ===== */
+function openChapter(i){
+  current=i;
+  document.getElementById("homePage").classList.add("hidden");
+  document.getElementById("bannerContainer").style.display="none";
+  document.getElementById("readerPage").classList.remove("hidden");
+  document.getElementById("footerNav").classList.remove("hidden");
+  renderChapter();
+  window.scrollTo(0,0);
+}
+
+function renderChapter(){
+  const ch=chapters[current];
+  if(!ch) return;
+  document.getElementById("chapterTitle").textContent=ch.title;
+  document.getElementById("chapterContent").innerHTML=ch.content;
+  document.getElementById("currentChapterTitle").textContent=ch.title;
+  document.getElementById("footerDate").textContent=TODAY;
+  renderDropdown();
+}
+
+function renderDropdown(){
+  const dd=document.getElementById("dropdown");
+  dd.innerHTML="";
+  chapters.forEach((c,i)=>{
+    dd.innerHTML+=`<div class="dropdown-item" onclick="openChapter(${i})">${c.title}</div>`;
+  });
+}
+
+function toggleDropdown(){
+  document.getElementById("dropdown").classList.toggle("show");
+}
+function prevChapter(){ if(current>0) openChapter(current-1); }
+function nextChapter(){ if(current<chapters.length-1) openChapter(current+1); }
+
+window.addEventListener("scroll",()=>{
+  const h=document.documentElement.scrollHeight-innerHeight;
+  if(h>0) document.getElementById("progress").style.width=(scrollY/h*100)+"%";
+});
+
+/* ===== PASSWORD ===== */
+function showPassword(){
+  if(edit){ toggleEdit(false); return; }
+  const pw=prompt("Nhập mật khẩu:");
+  if(pw===password) toggleEdit(true);
+  else if(pw!==null) alert("Sai mật khẩu!");
+}
+function toggleEdit(on){
+  edit=on;
+  document.getElementById("modeIndicator").textContent=on?"✏️ Chế độ Editor":"📖 Chế độ Đọc";
+  document.getElementById("modeIndicator").className="mode-indicator "+(on?"mode-edit":"mode-read");
+  document.getElementById("editBtn").classList.toggle("hidden",!on);
+  document.getElementById("bannerBtn").style.display=on?"block":"none";
+  document.getElementById("statusEditBtn").style.display=on?"inline-block":"none";
+  if(activeTab===1) renderArts();
+  if(activeTab===2) renderComments();
+}
+
+/* ===== MANAGE CHAPTERS ===== */
+function showManage(){
+  const ml=document.getElementById("manageList");
+  ml.innerHTML="";
+  if(chapters.length===0){
+    ml.innerHTML=`<p style="text-align:center;color:#aaa;padding:15px">Chưa có chapter nào</p>`;
+  } else {
+    chapters.forEach((c,i)=>{
+      ml.innerHTML+=`
+        <div style="display:flex;align-items:center;gap:8px;padding:10px;background:#fafafa;border-radius:10px;margin-bottom:8px">
+          <span style="flex:1;font-size:14px">${c.title}</span>
+          <button class="btn btn-primary" style="padding:6px 10px;font-size:12px" onclick="editChapter(${i})">✏️</button>
+          <button class="btn btn-danger" style="padding:6px 10px;font-size:12px" onclick="deleteChapter(${i})">🗑️</button>
+        </div>`;
+    });
+  }
+  document.getElementById("manageModal").classList.add("show");
+}
+
+function showAdd(){
+  editingIndex=-1;
+  document.getElementById("chapTitle").value="";
+  document.getElementById("chapContent").value="";
+  document.getElementById("addModalTitle").textContent="➕ Thêm Chapter";
+  closeModal("manageModal");
+  document.getElementById("addModal").classList.add("show");
+}
+
+function editChapter(i){
+  editingIndex=i;
+  document.getElementById("chapTitle").value=chapters[i].title;
+  document.getElementById("chapContent").value=chapters[i].content;
+  document.getElementById("addModalTitle").textContent="✏️ Sửa Chapter";
+  closeModal("manageModal");
+  document.getElementById("addModal").classList.add("show");
+}
+
+function saveChapter(){
+  const t=document.getElementById("chapTitle").value.trim();
+  const c=document.getElementById("chapContent").value.trim();
+  if(!t||!c) return alert("Vui lòng nhập đủ tiêu đề và nội dung!");
+  if(editingIndex>=0) chapters[editingIndex]={title:t,content:c};
+  else chapters.push({title:t,content:c});
+  localStorage.setItem("chapters",JSON.stringify(chapters));
+  closeModal("addModal");
+  renderHome();
+}
+
+function deleteChapter(i){
+  if(!confirm("Xóa chapter này?")) return;
+  chapters.splice(i,1);
+  localStorage.setItem("chapters",JSON.stringify(chapters));
+  showManage();
+  renderChapterList();
+}
+
+function closeModal(id){ document.getElementById(id).classList.remove("show"); }
+
+/* ===== BANNER ===== */
+function showBanner(){
+  document.getElementById("inputBanner").value="";
+  document.getElementById("inputCover").value="";
+  document.getElementById("bannerModal").classList.add("show");
+}
+function saveBanner(){
+  const nb=document.getElementById("inputBanner").value.trim();
+  const nc=document.getElementById("inputCover").value.trim();
+  if(nb){ bannerUrl=nb; localStorage.setItem("banner",nb); document.getElementById("banner").src=nb; }
+  if(nc){ coverUrl=nc; localStorage.setItem("cover",nc); document.getElementById("storyCover").src=nc; }
+  closeModal("bannerModal");
+}
+</script>
+</body>
+</html>
